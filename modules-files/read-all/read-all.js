@@ -13,26 +13,27 @@ const getList = (path) => {
   })
 };
 
-const getContent = (list) => {
+const getContent = (item, path) => {
   return new Promise((done, fail) => {
-    let a = list.map((item) => {
-      return {
-        name: item,
-        content: fs.readFile(`./logs/${item}`, 'utf8', (err, data) => {
+      const obj = {};
+        obj.name = item;
+        fs.readFile(`${path}${item}`, 'utf8', (err, data) => {
           if (err)
             fail(err);
           else {
-            done(data);
+            obj.content = data;
+            done(obj);
           }
-        })
-      };
+        });
     });
-    console.log(a);
-    return a;
-  })
-};
+  };
+
 
 module.exports = (path) => {
   return getList(path)
-    .then(list => getContent(list));
+    .then(list => Promise.all([
+      getContent(list[0], path),
+      getContent(list[1], path),
+      getContent(list[2], path),
+    ]))
 };
