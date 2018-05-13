@@ -23,6 +23,7 @@ module.exports = (path) => {
           })
         };
         console.log(a);
+        return a;
       })
     })
 };
