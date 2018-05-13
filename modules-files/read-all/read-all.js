@@ -1,6 +1,7 @@
 const fs = require('fs');
 
-module.exports = (path) => {
+
+const getList = (path) => {
   return new Promise((done, fail) => {
     fs.readdir(path, (err, list) => {
       if (err) {
@@ -8,22 +9,30 @@ module.exports = (path) => {
       } else {
         done(list);
       }
-
     })
   })
-    .then(list => {
-      return list.map((item) => {
-        let a = {
-          name: item,
-          content: fs.readFile(`${path}${item}`, 'utf8', (err, data) => {
-            if (err)
-              console.log(err);
-            else
-              return data;
-          })
-        };
-        console.log(a);
-        return a;
-      })
-    })
+};
+
+const getContent = (list) => {
+  return new Promise((done, fail) => {
+    let a = list.map((item) => {
+      return {
+        name: item,
+        content: fs.readFile(`./logs/${item}`, 'utf8', (err, data) => {
+          if (err)
+            fail(err);
+          else {
+            done(data);
+          }
+        })
+      };
+    });
+    console.log(a);
+    return a;
+  })
+};
+
+module.exports = (path) => {
+  return getList(path)
+    .then(list => getContent(list));
 };
