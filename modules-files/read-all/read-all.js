@@ -15,25 +15,24 @@ const getList = (path) => {
 
 const getContent = (item, path) => {
   return new Promise((done, fail) => {
-      const obj = {};
-        obj.name = item;
-        fs.readFile(`${path}${item}`, 'utf8', (err, data) => {
-          if (err)
-            fail(err);
-          else {
-            obj.content = data;
-            done(obj);
-          }
-        });
+    const obj = {};
+    obj.name = item;
+    fs.readFile(`${path}${item}`, 'utf8', (err, data) => {
+      if (err)
+        fail(err);
+      else {
+        obj.content = data;
+        done(obj);
+      }
     });
-  };
+  });
+};
 
 
 module.exports = (path) => {
+  const carryedGetContent = (item) => getContent(item, path);
   return getList(path)
-    .then(list => Promise.all([
-      getContent(list[0], path),
-      getContent(list[1], path),
-      getContent(list[2], path),
-    ]))
+    .then(list => {
+      return Promise.all(list.map(carryedGetContent))
+    });
 };
