@@ -24,12 +24,15 @@ let chatOnMessage = (message) => {
   console.log(message);
 };
 
-const prepResponse = (msg) => {
-  console.log(msg);
+const prepResponse = () => {
+  console.log('Готовлюсь к ответу');
 };
 
 webinarChat.on('message', prepResponse);
-webinarChat.emit('message', 'Готовлюсь к ответу');
+
+vkChat.setMaxListeners(2);
+
+vkChat.on('message', prepResponse);
 
 webinarChat.on('message', chatOnMessage);
 facebookChat.on('message', chatOnMessage);
