@@ -7,7 +7,7 @@ let filename = 'data.txt';
 let res;
 
 const input = fs.createReadStream(filename);
-const hash = crypto.createHash('sha512');
+const hash = crypto.createHash('md5');
 const output = fs.createWriteStream('hash.txt');
 res = input.pipe(hash);
 
