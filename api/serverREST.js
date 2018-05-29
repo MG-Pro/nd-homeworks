@@ -12,8 +12,33 @@ app.get('/users/', (req, res) => {
 
 app.post('/users/', (req, res) => {
   const id = users.length;
-  users.push(req.body);
-  res.json({id});
+  const result = {};
+  const badResult = {};
+  Object.keys(req.body).forEach((item) => {
+    if (item === 'name' || item === 'score') {
+      result[item] = req.body[item];
+    } else {
+      badResult[item] = req.body[item];
+    }
+  });
+
+  if(Object.keys(result)) {
+    users.push(result);
+    res.json({
+      id,
+      status: 'OK',
+      valid: result,
+      invalid: badResult
+    });
+    res.send();
+  } else {
+    res.status(400);
+    res.json({
+      status: 'Invalid property name',
+      invalid: badResult
+    });
+    res.send();
+  }
 });
 
 app.get('/users/:userId', (req, res) => {
