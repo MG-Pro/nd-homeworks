@@ -2,12 +2,37 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 
-const users = [];
+const users = [
+  {name: 'vasa', score: 10},
+  {name: 'misha', score: 20},
+  {name: 'sasha', score: 17},
+  {name: 'masha', score: 15},
+  {name: 'dart', score: 100},
+  {name: 't1000', score: 1000}
+];
 
 app.use(bodyParser.json());
 
 app.get('/users/', (req, res) => {
-  res.json(users.filter(user => user));
+  let begin = +req.query.offset || 0;
+  let end = (begin + +req.query.limit) || users.length - 1;
+  console.log(begin, end);
+
+  let result = users.slice(begin, end);
+  console.log(req.query.fields);
+  if (req.query.fields) {
+    const fields = req.query.fields;
+
+    result = result.map((user, index) => {
+      const resultUser = {};
+      fields.forEach((field) => {
+        resultUser[field] = result[index][field];
+      });
+      return resultUser;
+    });
+  }
+
+  res.json(result);
 });
 
 app.post('/users/', (req, res) => {
@@ -21,8 +46,7 @@ app.post('/users/', (req, res) => {
       badResult[item] = req.body[item];
     }
   });
-
-  if(Object.keys(result)) {
+  if (Object.keys(result)) {
     users.push(result);
     res.json({
       id,
@@ -66,6 +90,15 @@ app.put('/users/:userId', (req, res) => {
     res.status(404);
     res.send();
   }
+});
+
+// delete all users
+
+app.delete('/users/', (req, res) => {
+  while (users.length > 0) {
+    users.pop();
+  }
+  res.send(users);
 });
 
 app.listen(3000, () => console.log('App started on 3000 port'));
