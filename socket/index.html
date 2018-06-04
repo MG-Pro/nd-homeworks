@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Chat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font: 13px Helvetica, Arial;
+      background-color: #badcff;
+    }
+    form {
+      background: #000000;
+      padding: 3px;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+    }
+    form input {
+      border: 0;
+      padding: 10px;
+      width: 90%;
+      margin-right: .5%;
+    }
+    form button {
+      width: 9%;
+      background: #ffffff;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+    }
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    #messages li {
+      padding: 5px 10px;
+    }
+    #messages li span {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: bold;
+      background: #eeee6f;
+    }
+    #messages li:nth-child(odd) span {
+      background: #b3ee8e;
+    }
+    .container {
+      max-width: 980px;
+      margin: auto;
+      position: relative;
+      height: 100vh;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const socket = io();
+      document.getElementById('form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        socket.emit('chat message', e.currentTarget.m.value);
+        e.currentTarget.m.value = '';
+        e.currentTarget.m.focus();
+      });
+
+      socket.on('chat message', function (msg) {
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+        span.textContent = msg;
+        li.appendChild(span);
+        document.getElementById('messages').appendChild(li);
+      });
+      socket.on('newUser', function (name) {
+        const li = document.createElement('li');
+        li.textContent = `Add new user ${name}`;
+        document.getElementById('messages').appendChild(li);
+      });
+
+
+    })
+  </script>
+</head>
+<body>
+<div class="container">
+  <ul id="messages"></ul>
+  <form action="" id="form">
+    <input id="m" autocomplete="off"/>
+    <button>Send</button>
+  </form>
+</div>
+</body>
+</html>
