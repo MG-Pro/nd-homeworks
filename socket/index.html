@@ -12,7 +12,7 @@
     }
     body {
       font: 13px Helvetica, Arial;
-      background-color: #badcff;
+      background: linear-gradient(to bottom, #29bece 0%, #e5e5e5 100%);
     }
     form {
       background: #000000;
@@ -24,11 +24,11 @@
     form input {
       border: 0;
       padding: 10px;
-      width: 90%;
+      width: 69%;
       margin-right: .5%;
     }
     form button {
-      width: 9%;
+      min-width: 9%;
       background: #ffffff;
       border: none;
       padding: 10px;
@@ -41,14 +41,19 @@
     }
     #messages li {
       padding: 5px 10px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #0000ff;
     }
     #messages li span {
-      display: inline-block;
+      display: block;
       padding: 10px 20px;
-      border-radius: 50px;
+      border-radius: 12px;
       font-size: 18px;
       font-weight: bold;
       background: #eeee6f;
+      color: #000000;
+      margin-top: 10px;
     }
     #messages li:nth-child(odd) span {
       background: #b3ee8e;
@@ -64,27 +69,57 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const socket = io();
-      document.getElementById('form').addEventListener('submit', (e) => {
+      let nameG;
+      const form = document.getElementById('form');
+      
+      form.addEventListener('submit', (e) => {
         e.preventDefault();
-        socket.emit('chat message', e.currentTarget.m.value);
+        socket.emit('chat message', {name: nameG, msg: e.currentTarget.m.value});
         e.currentTarget.m.value = '';
         e.currentTarget.m.focus();
       });
 
-      socket.on('chat message', function (msg) {
+      socket.on('initName', function (data) {
+        nameG = data.name;
+      });
+
+      socket.on('chat message', function (data) {
         const li = document.createElement('li');
         const span = document.createElement('span');
-        span.textContent = msg;
+        li.textContent = data.name;
+        span.textContent = data.msg;
         li.appendChild(span);
         document.getElementById('messages').appendChild(li);
       });
-      socket.on('newUser', function (name) {
+      
+      socket.on('newUser', function (data) {
         const li = document.createElement('li');
-        li.textContent = `Add new user ${name}`;
+        li.textContent = `Add new user: ${data.name}`;
+        document.getElementById('messages').appendChild(li);
+      });
+      
+      socket.on('newRoom', function (data) {
+        const li = document.createElement('li');
+        li.textContent = `Create new room: ${data.name}`;
         document.getElementById('messages').appendChild(li);
       });
 
-
+      socket.on('joinRoom', function (data) {
+        const li = document.createElement('li');
+        li.textContent = `You joined the room: ${data.name}`;
+        document.getElementById('messages').appendChild(li);
+      });
+      
+      document.getElementById('join-room').addEventListener('click', (e) => {
+        e.preventDefault();
+        socket.emit('join', form.m.value);
+      });
+      
+      
+      document.getElementById('create-room').addEventListener('click', (e) => {
+        e.preventDefault();
+        socket.emit('create', form.m.value);
+      });
     })
   </script>
 </head>
@@ -93,7 +128,9 @@
   <ul id="messages"></ul>
   <form action="" id="form">
     <input id="m" autocomplete="off"/>
-    <button>Send</button>
+    <button id="submit">Send</button>
+    <button id="create-room">Create Room</button>
+    <button id="join-room">Join Room</button>
   </form>
 </div>
 </body>
