@@ -3,6 +3,7 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 
 const users ={};
+const rooms = {};
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
@@ -22,6 +23,7 @@ io.on('connection', function(socket){
 
   socket.on('create', function(room) {
     socket.join(room);
+    rooms[name] = room;
     socket.emit('newRoom', {name: room});
   });
 
