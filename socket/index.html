@@ -70,17 +70,19 @@
     document.addEventListener('DOMContentLoaded', () => {
       const socket = io();
       let nameG;
+      let currentRoom;
       const form = document.getElementById('form');
       
       form.addEventListener('submit', (e) => {
         e.preventDefault();
-        socket.emit('chat message', {name: nameG, msg: e.currentTarget.m.value});
+        socket.emit('chat message', {name: nameG, msg: e.currentTarget.m.value, room: currentRoom});
         e.currentTarget.m.value = '';
         e.currentTarget.m.focus();
       });
 
       socket.on('initName', function (data) {
         nameG = data.name;
+        currentRoom = data.room;
       });
 
       socket.on('chat message', function (data) {
@@ -100,21 +102,22 @@
       
       socket.on('newRoom', function (data) {
         const li = document.createElement('li');
-        li.textContent = `Create new room: ${data.name}`;
+        li.textContent = `Create new room: ${data.room}`;
         document.getElementById('messages').appendChild(li);
+        currentRoom = data.room;
       });
 
       socket.on('joinRoom', function (data) {
         const li = document.createElement('li');
-        li.textContent = `You joined the room: ${data.name}`;
+        li.textContent = `You joined the room: ${data.room}`;
         document.getElementById('messages').appendChild(li);
+        currentRoom = data.room;
       });
       
       document.getElementById('join-room').addEventListener('click', (e) => {
         e.preventDefault();
         socket.emit('join', form.m.value);
       });
-      
       
       document.getElementById('create-room').addEventListener('click', (e) => {
         e.preventDefault();

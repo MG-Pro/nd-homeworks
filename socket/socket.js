@@ -2,34 +2,46 @@ const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 
-const users ={};
-const rooms = {};
+const users = [];
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
+const changetUser = (id, data = {}) => {
+  users.forEach((user) => {
+    if(user.id === id) {
+      Object.assign(user, data);
+    }
+  });
+};
+
 io.on('connection', function(socket){
   socket.on('chat message', function(data){
-    io.emit('chat message', data);
+
+    socket.broadcast.to(data.room).emit('chat message', data);
   });
 
-  const name = `User${Object.keys(users).length}`;
-  users[name] = name;
-  const data = {name: name};
-
-  socket.emit('initName', data);
-  socket.broadcast.emit('newUser', data);
+  const name = `User${users.length}`;
+  users.push({
+    name: name,
+    room: 'def',
+    id: socket.id
+  });
+  console.log(users);
+  socket.emit('initName', users[users.length - 1]);
+  socket.broadcast.emit('newUser', users[users.length - 1]);
 
   socket.on('create', function(room) {
     socket.join(room);
-    rooms[name] = room;
-    socket.emit('newRoom', {name: room});
+    changetUser(socket.id, {room: room});
+    socket.emit('newRoom', {room: room});
   });
 
   socket.on('join', function(room) {
     socket.join(room);
-    socket.emit('joinRoom', {name: room});
+    changetUser(socket.id, {room: room});
+    socket.emit('joinRoom', {room: room});
   });
 });
 
