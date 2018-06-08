@@ -11,8 +11,8 @@ const users = [
 
 
 // add {"dbName": "test", "coll": "users", "doc": [{"name": "Anya", "age": "25"},{"name": "Lena", "age": "35"},{"name": "Ivan", "age": "15"}]}
-//
-//
+// find {"dbName": "test", "coll": "users"}
+// find {"dbName": "test", "coll": "users", "doc": [{"name": "Anya"}]}
 //
 
 const rl = readline.createInterface({
@@ -50,13 +50,15 @@ MongoClient.connect(url, function (err, client) {
         });
         break;
       case 'find':
-        collection.find().toArray(function(err, results){
+        console.log(data.doc);
+        collection.find(data.doc[0] || null).toArray(function(err, results){
           console.log(results);
           client.close();
         });
         break;
       case 'del':
         console.log('world!');
+
         break;
       case 'up':
         console.log('world!');
