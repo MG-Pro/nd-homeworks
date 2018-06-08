@@ -39,18 +39,21 @@ MongoClient.connect(url, function (err, client) {
       console.log(e);
     }
     //console.log(data);
+    const db = client.db(data.dbName);
+    const collection = db.collection(data.coll);
 
     switch(com) {
       case 'add':
-        const db = client.db(data.dbName);
-        const collection = db.collection(data.coll);
         collection.insert(data.doc, function(err, res){
           console.log(`Add data to db ${data.dbName} collection ${data.coll}: ${res.ops}`);
           client.close();
         });
         break;
       case 'find':
-        console.log('world!');
+        collection.find().toArray(function(err, results){
+          console.log(results);
+          client.close();
+        });
         break;
       case 'del':
         console.log('world!');
