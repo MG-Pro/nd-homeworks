@@ -14,6 +14,8 @@ const users = [
 // find {"dbName": "test", "coll": "users"}
 // find {"dbName": "test", "coll": "users", "doc": [{"name": "Anya"}]}
 // del {"dbName": "test", "coll": "users", "doc": [{"name": "Anya"}, {"name": "Lena"}, {"name": "Ivan"}]}
+// upd {"dbName": "test", "coll": "users", "doc": [{"name": "Anya"}, {"name": "Lena"}, {"name": "Ivan"}], "upd": [{"name": "Katya"}, {"name": "Sveta"}, {"name": "Fedor"}]}
+//
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -29,47 +31,49 @@ MongoClient.connect(url, function (err, client) {
   console.log(`Connected successfully to server. Input add, del, upd or exit to JSON`);
   
   rl.on('line', (line) => {
-    const com = line.trim().split(' ', 1)[0];
-    const query = line.match(/\{(.+)\}/i)[0];
-    let data;
-    
-    try {
-      data = JSON.parse(query);
-    } catch (e) {
-      console.log(e);
+    const arrLine = line.trim().split(' ', 2);
+    const com = arrLine[0];
+    let data = {};
+    let db;
+    let collection;
+
+    if (arrLine.length >= 2) {
+      const query = line.match(/\{(.+)\}/i)[0];
+      try {
+        data = JSON.parse(query);
+      } catch (e) {
+        console.log(e);
+      }
+      db = client.db(data.dbName);
+      collection = db.collection(data.coll);
     }
-    
-    const db = client.db(data.dbName);
-    const collection = db.collection(data.coll);
-    
+
     switch (com) {
       case 'add':
         collection.insert(data.doc, function (err, res) {
           if (err) return console.log(err);
           console.log(`Add data to db ${data.dbName} collection ${data.coll}: ${res.ops}`);
-          client.close();
         });
         break;
       case 'find':
-        collection.find(data.doc[0] || null).toArray(function (err, results) {
+        collection.find(data.doc ? data.doc[0] : null).toArray(function (err, results) {
           if (err) return console.log(err);
           console.log(results);
-          client.close();
         });
         break;
       case 'upd':
-        collection.updateMany(data.doc[0], {$set: data.doc[1]}, {returnOriginal: false}, function (err, result) {
+        data.doc.forEach((item, i) => {
+          collection.updateMany(item, {$set: data.upd[i]});
+        });
+        collection.find().toArray(function (err, results) {
           if (err) return console.log(err);
-            console.log(result);
-            client.close();
-          }
-        );
+          console.log(results);
+        });
         break;
       case 'del':
-        collection.deleteMany(data.doc[0] || null, function (err, result) {
+        collection.deleteMany(data.doc, function (err, result) {
           if (err) return console.log(err);
           console.log(result);
-          client.close();
         });
         break;
       case 'exit':
@@ -85,9 +89,4 @@ MongoClient.connect(url, function (err, client) {
     console.log('Close');
     process.exit(0);
   });
-  
 });
-
-
-
-
