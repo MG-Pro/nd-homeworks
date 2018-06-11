@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Phone Book</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
+    integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+  <link rel="stylesheet" href="style.css">
+  <script type="text/javascript" src="script.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-light bg-light">
+  <div class="container">
+    <div class="navbar-brand">Phone Book</div>
+  </div>
+</nav>
+<div class="container">
+  <div class="row flex-xl-nowrap">
+    <div class="col-4 pt-md-5  bd-sidebar">
+      <form action="" class="bd-search d-flex align-items-center">
+        <input type="search" class="form-control ds-input" placeholder="Search...">
+        <button class="btn btn-link d-md-none p-0 ml-3"></button>
+      </form>
+      <nav class="bd-links">
+        <ul class="list-group list-group-flush" id="user-list">
+          <li class="list-group-item">
+            <p class="name">Fgrgerre</p>
+            <p class="phone">00000000</p>
+          </li>
+          <li class="list-group-item">
+            <p class="name">Fgrgerre</p>
+            <p class="phone">00000000</p>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <main class="col-8 py-md-3 pl-md-5 bd-content">
+      <form>
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" class="form-control" id="name">
+        </div>
+        <div class="form-group">
+          <label for="lastname">Lastname</label>
+          <input type="text" class="form-control" id="lastname">
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input type="tel" class="form-control" id="phone">
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-info dropdown-toggle">Add field</button>
+          <div class="dropdown-menu">
+            <button class="dropdown-item">Action</button>
+          </div>
+        </div>
+        <button class="btn btn-danger" disabled>Save</button>
+      </form>
+    </main>
+  </div>
+</div>
+</body>
+</html>
