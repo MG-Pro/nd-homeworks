@@ -17,7 +17,7 @@
 </nav>
 <div class="container">
   <div class="row flex-xl-nowrap">
-    <div class="col-4 pt-md-5  bd-sidebar">
+    <div class="col-4 pt-md-3  bd-sidebar">
       <form action="" class="bd-search d-flex align-items-center">
         <input type="search" class="form-control ds-input" placeholder="Search...">
         <button class="btn btn-link d-md-none p-0 ml-3"></button>
@@ -36,26 +36,21 @@
       </nav>
     </div>
     <main class="col-8 py-md-3 pl-md-5 bd-content">
-      <form>
-        <div class="form-group">
-          <label for="name">Name</label>
-          <input type="text" class="form-control" id="name">
-        </div>
-        <div class="form-group">
-          <label for="lastname">Lastname</label>
-          <input type="text" class="form-control" id="lastname">
-        </div>
-        <div class="form-group">
-          <label for="phone">Phone</label>
-          <input type="tel" class="form-control" id="phone">
-        </div>
+      <div class="jumbotron" id="error" hidden></div>
+      <div class="row justify-content-end">
+        <button class="btn btn-primary fr" id="new">+ New</button>
+      </div>
+      <form id="form" hidden>
+        <div id="input-group"></div>
         <div class="btn-group">
-          <button class="btn btn-info dropdown-toggle">Add field</button>
+          <button class="btn btn-info dropdown-toggle" id="add">Add field</button>
           <div class="dropdown-menu">
             <button class="dropdown-item">Action</button>
           </div>
         </div>
-        <button class="btn btn-danger" disabled>Save</button>
+        
+        <button class="btn btn-success" id="save" disabled>Save</button>
+        <button class="btn btn-danger" id="del" disabled>Delete</button>
       </form>
     </main>
   </div>

@@ -2,7 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const app = express();
-
 const url = 'mongodb://localhost:27017';
 const dbName = 'phoneBook';
 let paramsCollection;
