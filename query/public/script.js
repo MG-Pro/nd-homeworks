@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveBut = document.getElementById('save');
   const newBut = document.getElementById('new');
   const delBut = document.getElementById('del');
+  const errElem = document.getElementById('info');
 
   const cleanList = (list) => {
     Array.from(list.children).forEach(elem => elem.remove());
@@ -26,44 +27,47 @@ document.addEventListener('DOMContentLoaded', () => {
         return response.json();
       })
       .then(data => {
-        cleanList(userListElem);
-        const li = document.createElement('li');
-        const p = document.createElement('p');
-        li.classList.add('list-group-item');
-        data.forEach((item) => {
-          const name = p.cloneNode();
-          name.classList.add('name');
-          const phone = p.cloneNode();
-          phone.classList.add('phone');
-          name.textContent = item.name;
-          phone.textContent = item.phone;
-          li.appendChild(name);
-          li.appendChild(phone);
-          li.dataset.phone = item.phone;
-          userListElem.appendChild(li);
-        })
+        if (data.status === 'OK') {
+          cleanList(userListElem);
+          const li = document.createElement('li');
+          const p = document.createElement('p');
+          li.classList.add('list-group-item');
+          data.msg.forEach((item) => {
+            const liItem = li.cloneNode();
+            const name = p.cloneNode();
+            name.classList.add('name');
+            const phone = p.cloneNode();
+            phone.classList.add('phone');
+            name.textContent = item.name;
+            phone.textContent = item.phone;
+            liItem.appendChild(name);
+            liItem.appendChild(phone);
+            liItem.dataset.phone = item.phone;
+            userListElem.appendChild(liItem);
+          })
+        } else {
+          const p = document.createElement('p');
+          p.classList.add('error');
+          p.textContent = data.msg;
+          errElem.appendChild(p);
+        }
       })
       .catch(err => {
         console.log(err)
       });
-
   };
 
-
-
   userListElem.addEventListener('click', (e) => {
-
     let target;
-    if(e.target.nodeName === 'LI') {
+    if (e.target.nodeName === 'LI') {
       target = e.target;
     } else if (e.target.nodeName === 'P') {
       target = e.target.parentElement;
     } else {
       return;
     }
-    console.log(target);
     setFormData(target.dataset.phone);
-
+    delBut.disabled = false;
   });
 
   const setFormData = (phone) => {
@@ -72,7 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return response.json();
       })
       .then(data => {
-        createFormField(data[0])
+        if (data.status === 'OK') {
+          createFormField(data.msg[0]);
+        } else {
+          const p = document.createElement('p');
+          p.classList.add('error');
+          p.textContent = data.msg;
+          errElem.appendChild(p);
+        }
       })
       .catch(err => {
         console.log(err)
@@ -83,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const group = form.querySelector('#input-group');
     cleanList(group);
     let data = user;
-    if(!user) {
+    if (!user) {
       data = {
         name: '',
         lastName: '',
@@ -110,21 +121,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
       itemInput.id = item;
       itemInput.value = data[item];
-      if(item === 'phone') {
+      if (item === 'phone' || item === 'homePhone') {
         itemInput.setAttribute('type', 'tel');
         itemInput.addEventListener('input', (e) => {
-          const reg = /^\+?\d*/i;
+          const reg = /^\+?\d*$/ig;
           const val = e.target.value;
-          e.target.value = val.replace(val[val.length - 1], '');
-
-          console.log(/^\+?\d*/.test(val));
-          if(reg.test(val)) {
+          if (!reg.test(val)) {
+            console.log(5);
             e.target.value = val.replace(val[val.length - 1], '');
           }
         });
       }
       itemDiv.appendChild(itemInput);
-
       group.appendChild(itemDiv);
     }
 
@@ -142,14 +150,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const submitData = () => {
     const data = {};
-    const errElem = document.getElementById('error');
     errElem.hidden = true;
     cleanList(errElem);
     Array.from(form).forEach(item => {
-      if(!item.classList.contains('form-control')) {
+      if (!item.classList.contains('form-control')) {
         return;
       }
-      if(item.value.length < 3) {
+      if (item.value.length < 3) {
         errElem.hidden = false;
         const p = document.createElement('p');
         p.classList.add('error');
@@ -161,19 +168,62 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (userValidator(data)) {
-      fetch(`${url}/users/`, {method: 'post'})
+      fetch(`${url}/users/`, {
+        method: 'post',
+        body: JSON.stringify(data),
+        headers: {'Content-Type': 'application/json'}
+      })
         .then(response => {
           return response.json();
         })
         .then(data => {
-          createFormField(data[0])
+          errElem.hidden = false;
+          const p = document.createElement('p');
+          if (data.status === 'OK') {
+            p.textContent = `User added`;
+            p.classList.add('info');
+            createFormField(data[0]);
+            createUserList();
+          } else {
+            p.classList.add('error');
+          }
+          errElem.appendChild(p);
         })
         .catch(err => {
           console.log(err)
         });
     }
-
   };
 
+  delBut.addEventListener('click', (e) => {
+    const phone = form[1].value;
+    e.preventDefault();
+    fetch(`${url}/users/${phone}`, {
+      method: 'delete',
+      body: JSON.stringify(data),
+      headers: {'Content-Type': 'application/json'}
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        errElem.hidden = false;
+        const p = document.createElement('p');
+        if (data.status === 'OK') {
+          p.textContent = `User added`;
+          p.classList.add('info');
+          createUserList();
+        } else {
+          p.textContent = data.msg;
+          p.classList.add('error');
+        }
+        errElem.appendChild(p);
+      })
+      .catch(err => {
+        console.log(err)
+      });
+
+
+  });
   createUserList();
 });

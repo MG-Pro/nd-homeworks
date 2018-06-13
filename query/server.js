@@ -25,26 +25,40 @@ app.get('/', (req, res) => {
 
 app.get('/params', (req, res) => {
   paramsCollection.find().toArray((err, dbres) => {
-    if (err) return res.json(err);
+    if (err) return res.json({
+      status: 'err',
+      msg: err
+    });
     res.json(dbres[0].fields);
   })
 });
 
 app.post('/users/', (req, res) => {
   const data = req.body;
-
+  console.log(data);
   if(!userValidator(data)) {
-    res.json({msg: 'Not enough data'});
+    res.json({
+      status: 'err',
+      msg: 'Not enough data'});
     return;
   }
   collection.find({phone: data.phone},{"_id" : 1, phone: 1}).limit(1).count((err, count) => {
-    if (err) return res.json(err);
-    if (count) return res.json('User already added');
+    if (err) return res.json({
+      status: 'err',
+      msg: err
+    });
+    if (count) return res.json({
+      status: 'err',
+      msg: 'User already added'});
 
     collection.insertOne(data, (err, dbres) => {
-      if (err) return res.json(err);
+      if (err) return res.json({
+        status: 'err',
+        msg: err
+      });
       res.json({
-        status: `User ${data.name} ${data.lastName} added`,
+        status: `OK`,
+        msg: `User ${data.name} ${data.lastName} added`,
         user: dbres.ops
       });
     });
@@ -57,8 +71,13 @@ app.get('/users/:phone', (req, res) => {
     userPhone = {phone: req.params.phone}
   }
   collection.find(userPhone).toArray(function (err, dbres) {
-    if (err) return res.json(err);
-    res.json(dbres);
+    if (err) return res.json({
+      status: 'err',
+      msg: err
+    });
+    res.json({
+      status: 'OK',
+      msg: dbres});
   });
 });
 
@@ -71,7 +90,10 @@ app.put('/users/:phone', (req, res) => {
     if (!count) return res.json('User undefined');
 
     collection.updateOne({phone: userPhone}, {$set: data}, (err, dbres) => {
-      if (err) return res.json(err);
+      if (err) return res.json({
+        status: 'err',
+        msg: err
+      });
       console.dir(dbres);
       res.json(`User updated`);
     })
@@ -81,8 +103,14 @@ app.put('/users/:phone', (req, res) => {
 app.delete('/users/:phone', (req, res) => {
   const userPhone = req.params.phone;
   collection.remove({phone: userPhone}, (err, dbres) => {
-    if (err) return res.json(err);
-    res.json(dbres.ops);
+    if (err) return res.json({
+      status: 'err',
+      msg: err
+    });
+    res.json({
+      status: 'OK',
+      msg: dbres.ops
+    });
   })
 });
 
