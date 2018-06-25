@@ -70,55 +70,49 @@
     document.addEventListener('DOMContentLoaded', () => {
       const socket = io();
       let nameG;
-      let currentRoom;
       const form = document.getElementById('form');
-      
+      const msgCont = document.getElementById('messages');
+
       form.addEventListener('submit', (e) => {
         e.preventDefault();
-        socket.emit('chat message', {name: nameG, msg: e.currentTarget.m.value, room: currentRoom});
+        socket.emit('msg', {name: nameG, msg: e.currentTarget.m.value});
         e.currentTarget.m.value = '';
         e.currentTarget.m.focus();
       });
 
-      socket.on('initName', function (data) {
-        nameG = data.name;
-        currentRoom = data.room;
-      });
-
-      socket.on('chat message', function (data) {
+      socket.on('msg', function (user) {
         const li = document.createElement('li');
         const span = document.createElement('span');
-        li.textContent = data.name;
-        span.textContent = data.msg;
+        li.textContent = user.name;
+        span.textContent = user.msg;
         li.appendChild(span);
-        document.getElementById('messages').appendChild(li);
-      });
-      
-      socket.on('newUser', function (data) {
-        const li = document.createElement('li');
-        li.textContent = `Add new user: ${data.name}`;
-        document.getElementById('messages').appendChild(li);
-      });
-      
-      socket.on('newRoom', function (data) {
-        const li = document.createElement('li');
-        li.textContent = `Create new room: ${data.room}`;
-        document.getElementById('messages').appendChild(li);
-        currentRoom = data.room;
+        msgCont.appendChild(li);
       });
 
-      socket.on('joinRoom', function (data) {
+      socket.on('newUser', function (user) {
         const li = document.createElement('li');
-        li.textContent = `You joined the room: ${data.room}`;
-        document.getElementById('messages').appendChild(li);
-        currentRoom = data.room;
+        li.textContent = `Add new user: ${user.name}`;
+        msgCont.appendChild(li);
+        nameG = user.name;
       });
-      
+
+      socket.on('newRoom', function (user) {
+        const li = document.createElement('li');
+        li.textContent = `Create new room: ${user.room}`;
+        msgCont.appendChild(li);
+      });
+
+      socket.on('joinRoom', function (user) {
+        const li = document.createElement('li');
+        li.textContent = `You joined the room: ${user.room}`;
+        msgCont.appendChild(li);
+      });
+
       document.getElementById('join-room').addEventListener('click', (e) => {
         e.preventDefault();
         socket.emit('join', form.m.value);
       });
-      
+
       document.getElementById('create-room').addEventListener('click', (e) => {
         e.preventDefault();
         socket.emit('create', form.m.value);

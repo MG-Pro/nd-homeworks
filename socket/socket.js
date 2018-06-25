@@ -8,7 +8,7 @@ app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
-const changetUser = (id, data = {}) => {
+const changeUser = (id, data = {}) => {
   users.forEach((user) => {
     if(user.id === id) {
       Object.assign(user, data);
@@ -16,36 +16,42 @@ const changetUser = (id, data = {}) => {
   });
 };
 
-io.on('connection', function(socket){
-  socket.on('chat message', function(data){
-
-    socket.broadcast.to(data.room).emit('chat message', data);
+const getUser = (id) => {
+  return users.find((user) => {
+    return user.id === id;
   });
+};
 
-  const name = `User${users.length}`;
+io.on('connection', (socket) => {
+  const name = `User_${users.length}`;
   users.push({
     name: name,
     room: 'def',
     id: socket.id
   });
-  console.log(users);
-  socket.emit('initName', users[users.length - 1]);
-  socket.broadcast.emit('newUser', users[users.length - 1]);
+  socket.join(getUser(socket.id).room);
+  socket.room = getUser(socket.id).room;
+  socket.emit('newUser', users[users.length - 1]);
 
-  socket.on('create', function(room) {
+  socket.on('create', (room) => {
     socket.join(room);
-    changetUser(socket.id, {room: room});
-    socket.emit('newRoom', {room: room});
+    socket.leave(getUser(socket.id).room);
+    changeUser(socket.id, {room: room});
+    socket.to(getUser(socket.id).room).emit('newRoom', {room: room});
   });
 
-  socket.on('join', function(room) {
+  socket.on('join', (room) => {
     socket.join(room);
-    changetUser(socket.id, {room: room});
+    socket.leave(getUser(socket.id).room);
+    changeUser(socket.id, {room: room});
     socket.emit('joinRoom', {room: room});
+  });
+
+  socket.on('msg', (data) => {
+    socket.to(getUser(socket.id).room).emit('msg', data);
   });
 });
 
 http.listen(3000, () => {
   console.log('App started on 3000 port');
 });
-
