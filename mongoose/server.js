@@ -69,12 +69,12 @@ app.get('/users/:name', (req, res) => {
   })
 });
 
-app.put('/users/:name', (req, res) => {
-  UserModel.updateOne({name: req.params.name}, {name: req.body.name}, (err) => {
+app.put('/users/:id', (req, res) => {
+  UserModel.findByIdAndUpdate(req.params.id, {name: req.body.name}, (err) => {
     if (err) {
       sender('err', err, res);
     }
-    UserModel.findOne({name: req.body.name}, (err, user) => {
+    UserModel.findOne({_id: req.params.id}, (err, user) => {
       if (err) {
         sender('err', err, res);
       }
@@ -83,12 +83,12 @@ app.put('/users/:name', (req, res) => {
   })
 });
 
-app.delete('/users/:name', (req, res) => {
-  UserModel.deleteOne({name: req.params.name}, (err) => {
+app.delete('/users/:id', (req, res) => {
+  UserModel.deleteOne({_id: req.params.id}, (err) => {
     if (err) {
       sender('err', err, res);
     }
-    sender('OK', `User ${req.params.name} deleted`, res);
+    sender('OK', `User deleted`, res);
   });
 });
 
@@ -134,8 +134,8 @@ app.get('/tasks/:query', (req, res) => {
   })
 });
 
-app.put('/tasks/:title', (req, res) => {
-  TaskModel.findOne({title: req.params.title}, (err, task) => {
+app.put('/tasks/:id', (req, res) => {
+  TaskModel.findOne({_id: req.params.id}, (err, task) => {
     if (err) {
       sender('err', err, res);
     }
@@ -166,12 +166,12 @@ app.put('/tasks/:title', (req, res) => {
   })
 });
 
-app.delete('/tasks/:query', (req, res) => {
-  UserModel.deleteOne({title: req.params.query}, (err) => {
+app.delete('/tasks/:id', (req, res) => {
+  UserModel.deleteOne({_id: req.params.id}, (err) => {
     if (err) {
       sender('err', err, res);
     }
-    sender('OK', `Task ${req.params.query} deleted`, res);
+    sender('OK', `Task deleted`, res);
   });
 });
 
