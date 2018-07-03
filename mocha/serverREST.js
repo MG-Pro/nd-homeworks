@@ -54,12 +54,14 @@ app.post('/users/', (req, res) => {
       valid: result,
       invalid: badResult
     });
+    res.send();
   } else {
     res.status(400);
     res.json({
       status: 'Invalid property name',
       invalid: badResult
     });
+    res.send();
   }
 });
 
@@ -100,5 +102,3 @@ app.delete('/users/', (req, res) => {
 });
 
 app.listen(3000, () => console.log('App started on 3000 port'));
-
-exports.app = app;
